@@ -445,6 +445,12 @@ func (t *Table) SearchData(input QueryInput) ([]map[string]*types.Item, map[stri
 		return nil, nil, err
 	}
 
+	if input.Index != "" {
+		if _, ok := t.Indexes[input.Index]; !ok {
+			return nil, nil, types.NewError("ValidationException", fmt.Sprintf("The table does not have the specified index: %s", input.Index), nil)
+		}
+	}
+
 	items := []map[string]*types.Item{}
 	limit := input.Limit
 	exclusiveStartKey := input.ExclusiveStartKey

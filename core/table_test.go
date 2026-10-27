@@ -1771,3 +1771,20 @@ func TestRestore(t *testing.T) {
 	c.Contains(table.Data, "001.Bulbasaur")
 	c.NotContains(table.Data, "004.Charmander")
 }
+
+func TestSearchData_unknownIndexReturnsValidationException(t *testing.T) {
+	c := require.New(t)
+
+	newTable, err := createPokemonTable()
+	c.NoError(err)
+
+	c.NotPanics(func() {
+		_, _, err = newTable.SearchData(QueryInput{Index: "missing-index"})
+	})
+	c.Error(err)
+
+	var apiErr types.Error
+	c.True(errors.As(err, &apiErr))
+	c.Equal("ValidationException", apiErr.Code())
+	c.Contains(apiErr.Message(), "missing-index")
+}
