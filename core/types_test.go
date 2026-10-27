@@ -290,3 +290,15 @@ func TestDeepCopyTypesItem_collections(t *testing.T) {
 	*it.M["sub"].S = "MUTATED"
 	c.Equal("nested", *got.M["sub"].S)
 }
+
+func TestDeepCopyTypesItem_keepsEmptyListAndMap(t *testing.T) {
+	c := require.New(t)
+
+	got := deepCopyTypesItem(&types.Item{L: []*types.Item{}})
+	c.NotNil(got.L)
+	c.Empty(got.L)
+
+	got = deepCopyTypesItem(&types.Item{M: map[string]*types.Item{}})
+	c.NotNil(got.M)
+	c.Empty(got.M)
+}

@@ -3521,3 +3521,33 @@ func TestServerPreservesEmptyListAndMap(t *testing.T) {
 	require.NoError(t, err)
 	require.IsType(t, &ddbtypes.AttributeValueMemberL{}, got.Item["tags"])
 }
+
+func TestServerFailedTransactionKeepsEmptyListAndMap(t *testing.T) {
+	ts := httptest.NewServer(NewServer())
+	defer ts.Close()
+
+	cli := newTestDynamoClient(t, ts.URL)
+	ctx := context.Background()
+	makeBasicTable(t, cli, "pokemons", "id")
+
+	key := map[string]ddbtypes.AttributeValue{"id": &ddbtypes.AttributeValueMemberS{Value: "001"}}
+	_, err := cli.PutItem(ctx, &dynamodb.PutItemInput{TableName: aws.String("pokemons"), Item: map[string]ddbtypes.AttributeValue{
+		"id":    &ddbtypes.AttributeValueMemberS{Value: "001"},
+		"moves": &ddbtypes.AttributeValueMemberL{Value: []ddbtypes.AttributeValue{}},
+		"stats": &ddbtypes.AttributeValueMemberM{Value: map[string]ddbtypes.AttributeValue{}},
+	}})
+	require.NoError(t, err)
+
+	// The condition fails, so the table is restored from its snapshot.
+	_, err = cli.TransactWriteItems(ctx, &dynamodb.TransactWriteItemsInput{TransactItems: []ddbtypes.TransactWriteItem{{
+		ConditionCheck: &ddbtypes.ConditionCheck{TableName: aws.String("pokemons"), Key: key, ConditionExpression: aws.String("attribute_not_exists(id)")},
+	}}})
+	require.Error(t, err)
+
+	got, err := cli.GetItem(ctx, &dynamodb.GetItemInput{TableName: aws.String("pokemons"), Key: key})
+	require.NoError(t, err)
+	require.IsType(t, &ddbtypes.AttributeValueMemberL{}, got.Item["moves"])
+	require.Empty(t, got.Item["moves"].(*ddbtypes.AttributeValueMemberL).Value)
+	require.IsType(t, &ddbtypes.AttributeValueMemberM{}, got.Item["stats"])
+	require.Empty(t, got.Item["stats"].(*ddbtypes.AttributeValueMemberM).Value)
+}
