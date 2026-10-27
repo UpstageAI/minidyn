@@ -3486,3 +3486,36 @@ func TestServerTransactGetItems(t *testing.T) {
 		c.Equal("10", out.Responses[1].Item["qty"].(*ddbtypes.AttributeValueMemberN).Value)
 	})
 }
+
+func TestServerPreservesEmptyListAndMap(t *testing.T) {
+	ts := httptest.NewServer(NewServer())
+	defer ts.Close()
+
+	cli := newTestDynamoClient(t, ts.URL)
+	ctx := context.Background()
+	makeBasicTable(t, cli, "pokemons", "id")
+
+	key := map[string]ddbtypes.AttributeValue{"id": &ddbtypes.AttributeValueMemberS{Value: "001"}}
+	_, err := cli.PutItem(ctx, &dynamodb.PutItemInput{TableName: aws.String("pokemons"), Item: map[string]ddbtypes.AttributeValue{
+		"id":    &ddbtypes.AttributeValueMemberS{Value: "001"},
+		"moves": &ddbtypes.AttributeValueMemberL{Value: []ddbtypes.AttributeValue{}},
+		"stats": &ddbtypes.AttributeValueMemberM{Value: map[string]ddbtypes.AttributeValue{}},
+	}})
+	require.NoError(t, err)
+
+	got, err := cli.GetItem(ctx, &dynamodb.GetItemInput{TableName: aws.String("pokemons"), Key: key})
+	require.NoError(t, err)
+	require.IsType(t, &ddbtypes.AttributeValueMemberL{}, got.Item["moves"])
+	require.Empty(t, got.Item["moves"].(*ddbtypes.AttributeValueMemberL).Value)
+	require.IsType(t, &ddbtypes.AttributeValueMemberM{}, got.Item["stats"])
+	require.Empty(t, got.Item["stats"].(*ddbtypes.AttributeValueMemberM).Value)
+
+	_, err = cli.UpdateItem(ctx, &dynamodb.UpdateItemInput{TableName: aws.String("pokemons"), Key: key,
+		UpdateExpression:          aws.String("SET tags = :empty"),
+		ExpressionAttributeValues: map[string]ddbtypes.AttributeValue{":empty": &ddbtypes.AttributeValueMemberL{Value: []ddbtypes.AttributeValue{}}},
+	})
+	require.NoError(t, err)
+	got, err = cli.GetItem(ctx, &dynamodb.GetItemInput{TableName: aws.String("pokemons"), Key: key})
+	require.NoError(t, err)
+	require.IsType(t, &ddbtypes.AttributeValueMemberL{}, got.Item["tags"])
+}
