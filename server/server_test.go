@@ -1050,6 +1050,30 @@ func TestServerDescribeTableIncludesGSIStatus(t *testing.T) {
 	require.Equal(t, ddbtypes.IndexStatusActive, describeServerGlobalSecondaryIndexStatus(t, cli, "pokemons", "by-type"))
 }
 
+func TestServerTableStatusIsActive(t *testing.T) {
+	ts := httptest.NewServer(NewServer())
+	defer ts.Close()
+
+	cli := newTestDynamoClient(t, ts.URL)
+	ctx := context.Background()
+	created, err := cli.CreateTable(ctx, &dynamodb.CreateTableInput{
+		TableName:            aws.String("pokemons"),
+		BillingMode:          ddbtypes.BillingModePayPerRequest,
+		AttributeDefinitions: []ddbtypes.AttributeDefinition{{AttributeName: aws.String("id"), AttributeType: ddbtypes.ScalarAttributeTypeS}},
+		KeySchema:            []ddbtypes.KeySchemaElement{{AttributeName: aws.String("id"), KeyType: ddbtypes.KeyTypeHash}},
+	})
+	require.NoError(t, err)
+	require.Equal(t, ddbtypes.TableStatusActive, created.TableDescription.TableStatus)
+
+	described, err := cli.DescribeTable(ctx, &dynamodb.DescribeTableInput{TableName: aws.String("pokemons")})
+	require.NoError(t, err)
+	require.Equal(t, ddbtypes.TableStatusActive, described.Table.TableStatus)
+
+	// The SDK TableExists waiter polls DescribeTable until the status is ACTIVE.
+	waiter := dynamodb.NewTableExistsWaiter(cli)
+	require.NoError(t, waiter.Wait(ctx, &dynamodb.DescribeTableInput{TableName: aws.String("pokemons")}, time.Second))
+}
+
 func TestServerSetIndexActivationDelayReportsGSIStatusTransition(t *testing.T) {
 	srv := NewServer()
 	srv.SetIndexActivationDelay(5 * time.Millisecond)

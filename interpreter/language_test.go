@@ -175,6 +175,28 @@ func updateTestCaseVerify(tc updateTestCase, t *testing.T) {
 func TestLanguageUpdate(t *testing.T) {
 	testCases := []updateTestCase{
 		{
+			name: "remove top-level attributes",
+			input: UpdateInput{
+				TableName:  "test",
+				Expression: "SET b = :a REMOVE c, #d",
+				Item: map[string]*types.Item{
+					"a": {S: new("a")},
+					"c": {S: new("c")},
+					"d": {N: new("4")},
+				},
+				Attributes: map[string]*types.Item{
+					":a": {N: new("1")},
+				},
+				Aliases: map[string]string{
+					"#d": "d",
+				},
+			},
+			output: map[string]*types.Item{
+				"a": {S: new("a")},
+				"b": {N: new("1")},
+			},
+		},
+		{
 			name: "successful",
 			input: UpdateInput{
 				TableName:  "test",

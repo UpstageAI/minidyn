@@ -324,6 +324,7 @@ func mapTableDescriptionToDDB(td *types.TableDescription) *ddbtypes.TableDescrip
 
 	return &ddbtypes.TableDescription{
 		TableName:              aws.String(td.TableName),
+		TableStatus:            ddbtypes.TableStatus(td.TableStatus),
 		ItemCount:              aws.Int64(td.ItemCount),
 		KeySchema:              mapTypesKeySchema(td.KeySchema),
 		GlobalSecondaryIndexes: mapTypesGSI(td.GlobalSecondaryIndexes),

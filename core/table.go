@@ -988,6 +988,7 @@ func (t *Table) Description(name string) *types.TableDescription {
 
 	return &types.TableDescription{
 		TableName:              name,
+		TableStatus:            "ACTIVE",
 		ItemCount:              int64(len(t.SortedKeys)),
 		KeySchema:              t.KeySchema.describe(),
 		GlobalSecondaryIndexes: gsi,

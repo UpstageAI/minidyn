@@ -459,6 +459,7 @@ func mapTypesToDynamoTableDescription(input *types.TableDescription) *dynamodbty
 
 	return &dynamodbtypes.TableDescription{
 		TableName:              toString(input.TableName),
+		TableStatus:            dynamodbtypes.TableStatus(input.TableStatus),
 		ItemCount:              aws.Int64(input.ItemCount),
 		KeySchema:              mapTypesToDynamoKeySchemaElements(input.KeySchema),
 		GlobalSecondaryIndexes: mapTypesToDynamoTypesGlobalSecondaryIndexes(input.GlobalSecondaryIndexes),

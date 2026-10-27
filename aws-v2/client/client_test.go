@@ -1994,6 +1994,7 @@ func TestDescribeTable(t *testing.T) {
 	c.Equal(aws.ToString(output.Table.TableName), tableName)
 	c.Equal(output.Table.KeySchema[0].KeyType, dynamodbtypes.KeyTypeHash)
 	c.Equal(aws.ToString(output.Table.KeySchema[0].AttributeName), "id")
+	c.Equal(dynamodbtypes.TableStatusActive, output.Table.TableStatus)
 }
 
 func TestDescribeTableFail(t *testing.T) {
