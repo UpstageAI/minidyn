@@ -3510,7 +3510,9 @@ func TestServerPreservesEmptyListAndMap(t *testing.T) {
 	require.IsType(t, &ddbtypes.AttributeValueMemberM{}, got.Item["stats"])
 	require.Empty(t, got.Item["stats"].(*ddbtypes.AttributeValueMemberM).Value)
 
-	_, err = cli.UpdateItem(ctx, &dynamodb.UpdateItemInput{TableName: aws.String("pokemons"), Key: key,
+	_, err = cli.UpdateItem(ctx, &dynamodb.UpdateItemInput{
+		TableName:                 aws.String("pokemons"),
+		Key:                       key,
 		UpdateExpression:          aws.String("SET tags = :empty"),
 		ExpressionAttributeValues: map[string]ddbtypes.AttributeValue{":empty": &ddbtypes.AttributeValueMemberL{Value: []ddbtypes.AttributeValue{}}},
 	})
