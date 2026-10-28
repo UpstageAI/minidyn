@@ -1176,8 +1176,8 @@ func mapKnownError(err error) error {
 		return nil
 	}
 
-	intErr, ok := errors.AsType[types.Error](err)
-	if !ok {
+	var intErr types.Error
+	if !errors.As(err, &intErr) {
 		return err
 	}
 
@@ -1187,7 +1187,8 @@ func mapKnownError(err error) error {
 			Message: aws.String(intErr.Message()),
 		}
 
-		if conditionalErr, ok := errors.AsType[*types.ConditionalCheckFailedException](err); ok {
+		var conditionalErr *types.ConditionalCheckFailedException
+		if errors.As(err, &conditionalErr) {
 			checkErr.Item = mapTypesMapToDDBAttributeValue(conditionalErr.Item)
 		}
 

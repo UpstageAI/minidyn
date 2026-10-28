@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/google/go-cmp/cmp"
 	"github.com/truora/minidyn/types"
 )
@@ -38,16 +39,16 @@ func matchTestCaseVerify(tc matchTestCase, t *testing.T) {
 func TestLanguageMatch(t *testing.T) {
 	item := map[string]*types.Item{
 		"a": {
-			S: new("a"),
+			S: aws.String("a"),
 		},
 		"n": {
-			N: new("1"),
+			N: aws.String("1"),
 		},
 		"b": {
 			BOOL: &boolTrue,
 		},
 		"txt": {
-			S: new("hello world"),
+			S: aws.String("hello world"),
 		},
 	}
 
@@ -60,7 +61,7 @@ func TestLanguageMatch(t *testing.T) {
 				Item:       item,
 				Attributes: map[string]*types.Item{
 					":a": {
-						S: new("a"),
+						S: aws.String("a"),
 					},
 				},
 			},
@@ -117,10 +118,10 @@ func TestLanguageMatch_keyConditionSyntaxErrorPrefix(t *testing.T) {
 		Expression:     "#a != :a",
 		ExpressionType: ExpressionTypeKey,
 		Item: map[string]*types.Item{
-			"a": {S: new("a")},
+			"a": {S: aws.String("a")},
 		},
 		Attributes: map[string]*types.Item{
-			":a": {S: new("x")},
+			":a": {S: aws.String("x")},
 		},
 		Aliases: map[string]string{"#a": "a"},
 	})
@@ -180,20 +181,20 @@ func TestLanguageUpdate(t *testing.T) {
 				TableName:  "test",
 				Expression: "SET b = :a REMOVE c, #d",
 				Item: map[string]*types.Item{
-					"a": {S: new("a")},
-					"c": {S: new("c")},
-					"d": {N: new("4")},
+					"a": {S: aws.String("a")},
+					"c": {S: aws.String("c")},
+					"d": {N: aws.String("4")},
 				},
 				Attributes: map[string]*types.Item{
-					":a": {N: new("1")},
+					":a": {N: aws.String("1")},
 				},
 				Aliases: map[string]string{
 					"#d": "d",
 				},
 			},
 			output: map[string]*types.Item{
-				"a": {S: new("a")},
-				"b": {N: new("1")},
+				"a": {S: aws.String("a")},
+				"b": {N: aws.String("1")},
 			},
 		},
 		{
@@ -203,12 +204,12 @@ func TestLanguageUpdate(t *testing.T) {
 				Expression: "SET #t = :a + :a, a = :a",
 				Item: map[string]*types.Item{
 					"a": {
-						S: new("a"),
+						S: aws.String("a"),
 					},
 				},
 				Attributes: map[string]*types.Item{
 					":a": {
-						N: new("1"),
+						N: aws.String("1"),
 					},
 				},
 				Aliases: map[string]string{
@@ -217,10 +218,10 @@ func TestLanguageUpdate(t *testing.T) {
 			},
 			output: map[string]*types.Item{
 				"a": {
-					N: new("1"),
+					N: aws.String("1"),
 				},
 				"two": {
-					N: new("2"),
+					N: aws.String("2"),
 				},
 			},
 		},
@@ -231,12 +232,12 @@ func TestLanguageUpdate(t *testing.T) {
 				Expression: "SET",
 				Item: map[string]*types.Item{
 					"a": {
-						S: new("a"),
+						S: aws.String("a"),
 					},
 				},
 				Attributes: map[string]*types.Item{
 					":a": {
-						N: new("1"),
+						N: aws.String("1"),
 					},
 				},
 			},
@@ -268,7 +269,7 @@ func TestLanguageProject(t *testing.T) {
 
 	inner := "v"
 	item := map[string]*types.Item{
-		"top": {S: new("x")},
+		"top": {S: aws.String("x")},
 		"nested": {
 			M: map[string]*types.Item{
 				"k": {S: &inner},
@@ -304,7 +305,7 @@ func TestLanguageProject_skipsMissingPath(t *testing.T) {
 	t.Parallel()
 
 	item := map[string]*types.Item{
-		"present": {S: new("a")},
+		"present": {S: aws.String("a")},
 	}
 
 	interp := Language{}
@@ -334,7 +335,7 @@ func TestLanguageProject_rejectsUpdateExpressionSyntax(t *testing.T) {
 	_, err := interp.Project(ProjectInput{
 		Expression: "SET #n = :x",
 		Item: map[string]*types.Item{
-			"n": {S: new("v")},
+			"n": {S: aws.String("v")},
 		},
 		Aliases: map[string]string{"#n": "n"},
 	})

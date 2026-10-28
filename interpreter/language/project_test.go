@@ -3,6 +3,7 @@ package language
 import (
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/google/go-cmp/cmp"
 	"github.com/truora/minidyn/types"
 )
@@ -101,8 +102,8 @@ func TestExtractPath_listIndex_nonNumericIdentifierEval(t *testing.T) {
 	env := NewEnvironment()
 
 	err := env.AddAttributes(map[string]*types.Item{
-		"L": {L: []*types.Item{{S: new("a")}, {S: new("b")}, {S: new("c")}}},
-		"k": {N: new("2")},
+		"L": {L: []*types.Item{{S: aws.String("a")}, {S: aws.String("b")}, {S: aws.String("c")}}},
+		"k": {N: aws.String("2")},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -181,8 +182,8 @@ func TestExtractPath_listIndex_evaluatesToNonNumber(t *testing.T) {
 	env := NewEnvironment()
 
 	err := env.AddAttributes(map[string]*types.Item{
-		"L": {L: []*types.Item{{S: new("x")}}},
-		"k": {S: new("text")},
+		"L": {L: []*types.Item{{S: aws.String("x")}}},
+		"k": {S: aws.String("text")},
 	})
 	if err != nil {
 		t.Fatal(err)

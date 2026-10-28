@@ -112,7 +112,8 @@ func generateStruct(gen *generated, t reflect.Type) { //nolint:gocognit,gocyclo 
 
 	fields := []string{}
 
-	for f := range t.Fields() {
+	for i := range t.NumField() {
+		f := t.Field(i)
 		// skip smithy internals and unexported.
 		if !f.IsExported() || f.Name == "noSmithyDocumentSerde" {
 			continue
@@ -229,7 +230,8 @@ func needsGeneration(t reflect.Type) bool {
 		return false
 	}
 
-	for f := range t.Fields() {
+	for i := range t.NumField() {
+		f := t.Field(i)
 		if !f.IsExported() {
 			continue
 		}
@@ -249,7 +251,8 @@ func containsAttributeValue(t reflect.Type) bool {
 	case reflect.Interface:
 		return t == attributeValueType
 	case reflect.Struct:
-		for field := range t.Fields() {
+		for i := range t.NumField() {
+			field := t.Field(i)
 			if containsAttributeValue(field.Type) {
 				return true
 			}

@@ -3,6 +3,7 @@ package core
 import (
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/stretchr/testify/require"
 	"github.com/truora/minidyn/types"
 )
@@ -22,7 +23,7 @@ func TestValidatePrimaryKeyMap(t *testing.T) {
 	t.Run("hash_only_ok", func(t *testing.T) {
 		t.Parallel()
 		err := hashOnly.validatePrimaryKeyMap(map[string]*types.Item{
-			"id": {S: new("1")},
+			"id": {S: aws.String("1")},
 		})
 		require.NoError(t, err)
 	})
@@ -30,7 +31,7 @@ func TestValidatePrimaryKeyMap(t *testing.T) {
 	t.Run("hash_only_wrong_name_same_len", func(t *testing.T) {
 		t.Parallel()
 		err := hashOnly.validatePrimaryKeyMap(map[string]*types.Item{
-			"wrong": {S: new("1")},
+			"wrong": {S: aws.String("1")},
 		})
 		require.ErrorIs(t, err, errMissingField)
 	})
@@ -38,8 +39,8 @@ func TestValidatePrimaryKeyMap(t *testing.T) {
 	t.Run("hash_only_extra_attr", func(t *testing.T) {
 		t.Parallel()
 		err := hashOnly.validatePrimaryKeyMap(map[string]*types.Item{
-			"id":    {S: new("1")},
-			"extra": {S: new("x")},
+			"id":    {S: aws.String("1")},
+			"extra": {S: aws.String("x")},
 		})
 		require.ErrorIs(t, err, errInvalidKeyConditionCount)
 	})
@@ -47,7 +48,7 @@ func TestValidatePrimaryKeyMap(t *testing.T) {
 	t.Run("composite_missing_range", func(t *testing.T) {
 		t.Parallel()
 		err := composite.validatePrimaryKeyMap(map[string]*types.Item{
-			"pk": {S: new("a")},
+			"pk": {S: aws.String("a")},
 		})
 		require.ErrorIs(t, err, errInvalidKeyConditionCount)
 	})
@@ -55,8 +56,8 @@ func TestValidatePrimaryKeyMap(t *testing.T) {
 	t.Run("composite_ok", func(t *testing.T) {
 		t.Parallel()
 		err := composite.validatePrimaryKeyMap(map[string]*types.Item{
-			"pk": {S: new("a")},
-			"sk": {S: new("b")},
+			"pk": {S: aws.String("a")},
+			"sk": {S: aws.String("b")},
 		})
 		require.NoError(t, err)
 	})
@@ -64,8 +65,8 @@ func TestValidatePrimaryKeyMap(t *testing.T) {
 	t.Run("composite_wrong_range_attr_name_same_len", func(t *testing.T) {
 		t.Parallel()
 		err := composite.validatePrimaryKeyMap(map[string]*types.Item{
-			"pk":    {S: new("a")},
-			"wrong": {S: new("b")},
+			"pk":    {S: aws.String("a")},
+			"wrong": {S: aws.String("b")},
 		})
 		require.ErrorIs(t, err, errMissingField)
 	})

@@ -120,7 +120,7 @@ func (i *Number) Type() ObjectType {
 func (i *Number) ToDynamoDB() types.Item {
 	str := numToString(i.Value)
 
-	return types.Item{N: new(str)}
+	return types.Item{N: &str}
 }
 
 func numToString(v float64) string {
@@ -268,7 +268,9 @@ func (s *String) Contains(obj Object) bool {
 
 // ToDynamoDB returns the types attribute value
 func (s *String) ToDynamoDB() types.Item {
-	return types.Item{S: new(s.Value)}
+	value := s.Value
+
+	return types.Item{S: &value}
 }
 
 // CanContain whether or not the string can contain the objType
@@ -548,7 +550,7 @@ func (ss *StringSet) ToDynamoDB() types.Item {
 	attr := types.Item{SS: make([]*string, 0, len(ss.Value))}
 
 	for v := range ss.Value {
-		attr.SS = append(attr.SS, new(v))
+		attr.SS = append(attr.SS, &v)
 	}
 
 	return attr
@@ -795,7 +797,7 @@ func (ns *NumberSet) ToDynamoDB() types.Item {
 	for v := range ns.Value {
 		str := numToString(v)
 
-		attr.NS = append(attr.NS, new(str))
+		attr.NS = append(attr.NS, &str)
 	}
 
 	return attr

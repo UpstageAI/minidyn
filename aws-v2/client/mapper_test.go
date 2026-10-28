@@ -43,7 +43,7 @@ func TestMapDynamoToTypes(t *testing.T) {
 	c.Equal([]byte("test"), item.B)
 
 	item = mapDynamoToTypesItem(&dynamodbtypes.AttributeValueMemberNS{Value: []string{"1", "2"}})
-	c.Equal([]*string{new("1"), new("2")}, item.NS)
+	c.Equal([]*string{aws.String("1"), aws.String("2")}, item.NS)
 
 	trueValue := true
 
@@ -70,7 +70,7 @@ func TestMapTypesToDynamo(t *testing.T) {
 	attributeDefinitionMapOutput := mapTypesToDynamoAttributeDefinitionMapOrList(input)
 	c.Equal(expectedAttributteValue, attributeDefinitionMapOutput)
 
-	input.M = map[string]*types.Item{"test": {S: new("test")}}
+	input.M = map[string]*types.Item{"test": {S: aws.String("test")}}
 	expectedAttributteValue = &dynamodbtypes.AttributeValueMemberM{Value: map[string]dynamodbtypes.AttributeValue{"test": &dynamodbtypes.AttributeValueMemberS{Value: "test"}}}
 
 	attributeDefinitionMapOutput = mapTypesToDynamoAttributeDefinitionMapOrList(input)
@@ -96,13 +96,13 @@ func TestMapTypesToDynamo(t *testing.T) {
 	resultItem = mapTypesToDynamoItem(item)
 	c.Equal(expectedAttributteValue, resultItem)
 
-	item = &types.Item{NS: []*string{new("1")}}
+	item = &types.Item{NS: []*string{aws.String("1")}}
 	expectedAttributteValue = &dynamodbtypes.AttributeValueMemberNS{Value: []string{"1"}}
 
 	resultItem = mapTypesToDynamoItem(item)
 	c.Equal(expectedAttributteValue, resultItem)
 
-	sliceResult := mapTypesToDynamoStringSlice([]*string{new("1")})
+	sliceResult := mapTypesToDynamoStringSlice([]*string{aws.String("1")})
 	c.Equal([]string{"1"}, sliceResult)
 
 	projection := mapTypesToDynamoProjection(nil)

@@ -3,6 +3,7 @@ package language
 import (
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/truora/minidyn/types"
 )
 
@@ -20,7 +21,7 @@ func TestString(t *testing.T) {
 func TestApply(t *testing.T) {
 	item := map[string]*types.Item{
 		"a": {
-			S: new("a"),
+			S: aws.String("a"),
 		},
 	}
 

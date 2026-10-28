@@ -3,6 +3,7 @@ package types
 import (
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,7 +23,7 @@ func TestValidateItemAttributeValue_stringSet(t *testing.T) {
 	}{
 		{
 			name: "unique SS",
-			item: &Item{SS: []*string{new("a"), new("b")}},
+			item: &Item{SS: []*string{aws.String("a"), aws.String("b")}},
 		},
 		{
 			name: "empty SS",
@@ -34,7 +35,7 @@ func TestValidateItemAttributeValue_stringSet(t *testing.T) {
 		},
 		{
 			name:    "duplicate SS top-level",
-			item:    &Item{SS: []*string{new("x"), new("y"), new("x")}},
+			item:    &Item{SS: []*string{aws.String("x"), aws.String("y"), aws.String("x")}},
 			wantErr: "One or more parameter values were invalid: Input collection [x, y, x] contains duplicates.",
 		},
 		{
@@ -45,15 +46,15 @@ func TestValidateItemAttributeValue_stringSet(t *testing.T) {
 		{
 			name: "nested duplicate SS inside M",
 			item: &Item{M: map[string]*Item{
-				"inner": {SS: []*string{new("p"), new("p")}},
+				"inner": {SS: []*string{aws.String("p"), aws.String("p")}},
 			}},
 			wantErr: "One or more parameter values were invalid: Input collection [p, p] contains duplicates.",
 		},
 		{
 			name: "nested duplicate SS inside L",
 			item: &Item{L: []*Item{
-				{S: new("skip")},
-				{SS: []*string{new("a"), new("b"), new("a")}},
+				{S: aws.String("skip")},
+				{SS: []*string{aws.String("a"), aws.String("b"), aws.String("a")}},
 			}},
 			wantErr: "One or more parameter values were invalid: Input collection [a, b, a] contains duplicates.",
 		},
@@ -86,11 +87,11 @@ func TestValidateItemAttributeValue_numberSet(t *testing.T) {
 	}{
 		{
 			name: "unique NS wire strings",
-			item: &Item{NS: []*string{new("1"), new("1.0")}},
+			item: &Item{NS: []*string{aws.String("1"), aws.String("1.0")}},
 		},
 		{
 			name:    "duplicate NS compares wire encoding only",
-			item:    &Item{NS: []*string{new("42"), new("42")}},
+			item:    &Item{NS: []*string{aws.String("42"), aws.String("42")}},
 			wantErr: "One or more parameter values were invalid: Input collection [42, 42] contains duplicates.",
 		},
 		{
@@ -164,11 +165,11 @@ func TestValidateItemMap(t *testing.T) {
 	require.NoError(t, ValidateItemMap(nil))
 	require.NoError(t, ValidateItemMap(map[string]*Item{}))
 	require.NoError(t, ValidateItemMap(map[string]*Item{
-		"k": {SS: []*string{new("only")}},
+		"k": {SS: []*string{aws.String("only")}},
 	}))
 
 	err := ValidateItemMap(map[string]*Item{
-		"colors": {SS: []*string{new("red"), new("red")}},
+		"colors": {SS: []*string{aws.String("red"), aws.String("red")}},
 	})
 	require.Error(t, err)
 	require.Equal(t,

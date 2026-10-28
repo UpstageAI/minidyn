@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/truora/minidyn/types"
 )
 
@@ -12,7 +13,7 @@ func TestUndeclaredExpressionAttributeNameErrors(t *testing.T) {
 
 	li := Language{}
 	item := map[string]*types.Item{
-		"id": {S: new("x")},
+		"id": {S: aws.String("x")},
 	}
 
 	t.Run("UpdateExpression", func(t *testing.T) {
@@ -21,7 +22,7 @@ func TestUndeclaredExpressionAttributeNameErrors(t *testing.T) {
 		err := li.Update(UpdateInput{
 			Expression: "SET #a = :v",
 			Item:       item,
-			Attributes: map[string]*types.Item{":v": {S: new("y")}},
+			Attributes: map[string]*types.Item{":v": {S: aws.String("y")}},
 		})
 		assertUndeclaredNameError(t, err, "UpdateExpression", "#a")
 	})
@@ -44,7 +45,7 @@ func TestUndeclaredExpressionAttributeNameErrors(t *testing.T) {
 			Expression:     "#a = :v",
 			ExpressionType: ExpressionTypeFilter,
 			Item:           item,
-			Attributes:     map[string]*types.Item{":v": {S: new("y")}},
+			Attributes:     map[string]*types.Item{":v": {S: aws.String("y")}},
 		})
 		assertUndeclaredNameError(t, err, "FilterExpression", "#a")
 	})
@@ -56,7 +57,7 @@ func TestUndeclaredExpressionAttributeNameErrors(t *testing.T) {
 			Expression:     "#a = :v",
 			ExpressionType: ExpressionTypeKey,
 			Item:           item,
-			Attributes:     map[string]*types.Item{":v": {S: new("y")}},
+			Attributes:     map[string]*types.Item{":v": {S: aws.String("y")}},
 		})
 		assertUndeclaredNameError(t, err, "KeyConditionExpression", "#a")
 	})
@@ -77,7 +78,7 @@ func TestUndeclaredExpressionAttributeNameErrors(t *testing.T) {
 		err := li.Update(UpdateInput{
 			Expression: "SET #b = :v REMOVE #c",
 			Item:       item,
-			Attributes: map[string]*types.Item{":v": {S: new("y")}},
+			Attributes: map[string]*types.Item{":v": {S: aws.String("y")}},
 		})
 		assertUndeclaredNameError(t, err, "UpdateExpression", "#b")
 	})
@@ -88,7 +89,7 @@ func TestUndeclaredExpressionAttributeNameErrors(t *testing.T) {
 		err := li.Update(UpdateInput{
 			Expression: "SET #a = :v",
 			Item:       item,
-			Attributes: map[string]*types.Item{":v": {S: new("y")}},
+			Attributes: map[string]*types.Item{":v": {S: aws.String("y")}},
 			Aliases:    map[string]string{"#a": "attr"},
 		})
 		if err != nil {

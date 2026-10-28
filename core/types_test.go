@@ -3,6 +3,7 @@ package core
 import (
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/stretchr/testify/require"
 	"github.com/truora/minidyn/types"
 )
@@ -10,7 +11,7 @@ import (
 func TestItemValue(t *testing.T) {
 	c := require.New(t)
 
-	v, err := getItemValue(map[string]*types.Item{"S": {S: new("test")}}, "S", "S")
+	v, err := getItemValue(map[string]*types.Item{"S": {S: aws.String("test")}}, "S", "S")
 	c.NoError(err)
 	c.Equal(v, "test")
 
@@ -19,11 +20,11 @@ func TestItemValue(t *testing.T) {
 	c.NoError(err)
 	c.Equal(v, &booleanVal)
 
-	v, err = getItemValue(map[string]*types.Item{"SS": {SS: []*string{new("t1"), new("t2")}}}, "SS", "SS")
+	v, err = getItemValue(map[string]*types.Item{"SS": {SS: []*string{aws.String("t1"), aws.String("t2")}}}, "SS", "SS")
 	c.NoError(err)
-	c.Equal(v, []*string{new("t1"), new("t2")})
+	c.Equal(v, []*string{aws.String("t1"), aws.String("t2")})
 
-	v, err = getItemValue(map[string]*types.Item{"N": {N: new("123.45")}}, "N", "N")
+	v, err = getItemValue(map[string]*types.Item{"N": {N: aws.String("123.45")}}, "N", "N")
 	c.NoError(err)
 	c.Equal(v, "123.45")
 
@@ -31,38 +32,38 @@ func TestItemValue(t *testing.T) {
 	c.NoError(err)
 	c.Equal(v, []byte("dGhpcyB0ZXh0IGlzIGJhc2U2NC1lbmNvZGVk"))
 
-	v, err = getItemValue(map[string]*types.Item{"L": {L: []*types.Item{{S: new("Cookie")}}}}, "L", "L")
+	v, err = getItemValue(map[string]*types.Item{"L": {L: []*types.Item{{S: aws.String("Cookie")}}}}, "L", "L")
 	c.NoError(err)
-	c.Equal(v, []*types.Item{{S: new("Cookie")}})
+	c.Equal(v, []*types.Item{{S: aws.String("Cookie")}})
 
-	v, err = getItemValue(map[string]*types.Item{"M": {M: map[string]*types.Item{"N": {N: new("123.45")}}}}, "M", "M")
+	v, err = getItemValue(map[string]*types.Item{"M": {M: map[string]*types.Item{"N": {N: aws.String("123.45")}}}}, "M", "M")
 	c.NoError(err)
-	c.Equal(v, map[string]*types.Item{"N": {N: new("123.45")}})
+	c.Equal(v, map[string]*types.Item{"N": {N: aws.String("123.45")}})
 
 	v, err = getItemValue(map[string]*types.Item{"BS": {BS: [][]byte{123: []byte("x"), []byte("y"), []byte("z")}}}, "BS", "BS")
 	c.NoError(err)
 	c.Equal(v, [][]byte{123: []byte("x"), []byte("y"), []byte("z")})
 
-	v, err = getItemValue(map[string]*types.Item{"NS": {NS: []*string{new("t1"), new("t2")}}}, "NS", "NS")
+	v, err = getItemValue(map[string]*types.Item{"NS": {NS: []*string{aws.String("t1"), aws.String("t2")}}}, "NS", "NS")
 	c.NoError(err)
-	c.Equal(v, []*string{new("t1"), new("t2")})
+	c.Equal(v, []*string{aws.String("t1"), aws.String("t2")})
 }
 
 func TestFailedItemValue(t *testing.T) {
 	c := require.New(t)
 
-	_, err := getItemValue(map[string]*types.Item{"D": {S: new("test")}}, "S", "S")
+	_, err := getItemValue(map[string]*types.Item{"D": {S: aws.String("test")}}, "S", "S")
 	c.Contains(err.Error(), errMissingField.Error())
 
-	_, err = getItemValue(map[string]*types.Item{"S": {S: new("test")}}, "S", "n")
+	_, err = getItemValue(map[string]*types.Item{"S": {S: aws.String("test")}}, "S", "n")
 	c.Contains(err.Error(), ErrInvalidAtrributeValue.Error())
 }
 
 func TestCopyItem(t *testing.T) {
 	c := require.New(t)
 
-	cItem := copyItem(map[string]*types.Item{"str": {N: new("test")}})
-	c.Equal(cItem, map[string]*types.Item{"str": {N: new("test")}})
+	cItem := copyItem(map[string]*types.Item{"str": {N: aws.String("test")}})
+	c.Equal(cItem, map[string]*types.Item{"str": {N: aws.String("test")}})
 }
 
 func TestMapToDynamoDBType(t *testing.T) {
@@ -105,17 +106,17 @@ func TestGetGoValue(t *testing.T) {
 		BOOL: &boolFalse,
 		BS:   [][]byte{{123}},
 		L: []*types.Item{
-			{N: new("1")}, {S: new("a")},
+			{N: aws.String("1")}, {S: aws.String("a")},
 		},
 		M: map[string]*types.Item{
 			"f": {
-				S: new("a"),
+				S: aws.String("a"),
 			},
 		},
-		N:  new("1"),
-		NS: []*string{new("1"), new("2")},
-		S:  new("a"),
-		SS: []*string{new("a"), new("b")},
+		N:  aws.String("1"),
+		NS: []*string{aws.String("1"), aws.String("2")},
+		S:  aws.String("a"),
+		SS: []*string{aws.String("a"), aws.String("b")},
 	}
 
 	goVal, ok := getGoValue(all, "B")
@@ -230,8 +231,8 @@ func TestDeepCopyTypesItem_scalars(t *testing.T) {
 	it := &types.Item{
 		BOOL: &tr,
 		NULL: &f,
-		S:    new("s"),
-		N:    new("1"),
+		S:    aws.String("s"),
+		N:    aws.String("1"),
 	}
 
 	got := deepCopyTypesItem(it)
@@ -257,10 +258,10 @@ func TestDeepCopyTypesItem_collections(t *testing.T) {
 	it := &types.Item{
 		B:  []byte{9},
 		BS: [][]byte{{1}},
-		SS: []*string{new("x")},
-		NS: []*string{new("1")},
+		SS: []*string{aws.String("x")},
+		NS: []*string{aws.String("1")},
 		L: []*types.Item{
-			{S: new("leaf")},
+			{S: aws.String("leaf")},
 		},
 		M: map[string]*types.Item{
 			"sub": {S: &sub},

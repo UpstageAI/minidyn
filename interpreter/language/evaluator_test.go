@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/truora/minidyn/types"
 )
 
@@ -120,13 +121,13 @@ func TestEval(t *testing.T) {
 	err := env.AddAttributes(map[string]*types.Item{
 		":a":        {BOOL: &boolTrue},
 		":b":        {BOOL: &boolFalse},
-		":s":        {S: new("HELLO WORLD!")},
-		":x":        {N: new("24")},
-		":y":        {N: new("25")},
-		":z":        {N: new("26")},
-		":txtA":     {S: new("a")},
-		":txtB":     {S: new("b")},
-		":txtC":     {S: new("c")},
+		":s":        {S: aws.String("HELLO WORLD!")},
+		":x":        {N: aws.String("24")},
+		":y":        {N: aws.String("25")},
+		":z":        {N: aws.String("26")},
+		":txtA":     {S: aws.String("a")},
+		":txtB":     {S: aws.String("b")},
+		":txtC":     {S: aws.String("c")},
 		":binA":     {B: []byte("a")},
 		":binB":     {B: []byte("b")},
 		":binC":     {B: []byte("c")},
@@ -144,23 +145,23 @@ func TestEval(t *testing.T) {
 		},
 		":listA": {
 			L: []*types.Item{
-				{S: new("a")},
-				{S: new("b")},
-				{S: new("c")},
+				{S: aws.String("a")},
+				{S: aws.String("b")},
+				{S: aws.String("c")},
 			},
 		},
 		":listB": {
 			L: []*types.Item{
-				{S: new("x")},
-				{S: new("y")},
-				{S: new("z")},
+				{S: aws.String("x")},
+				{S: aws.String("y")},
+				{S: aws.String("z")},
 			},
 		},
 		":strSetA": {
-			SS: []*string{new("a"), new("a"), new("b")},
+			SS: []*string{aws.String("a"), aws.String("a"), aws.String("b")},
 		},
 		":strSetB": {
-			SS: []*string{new("x"), new("x"), new("y")},
+			SS: []*string{aws.String("x"), aws.String("x"), aws.String("y")},
 		},
 		":binSetA": {
 			BS: [][]byte{[]byte("a"), []byte("a"), []byte("b")},
@@ -169,23 +170,23 @@ func TestEval(t *testing.T) {
 			BS: [][]byte{[]byte("x"), []byte("x"), []byte("y")},
 		},
 		":numSetA": {
-			NS: []*string{new("1"), new("2"), new("4")},
+			NS: []*string{aws.String("1"), aws.String("2"), aws.String("4")},
 		},
 		":numSetB": {
-			NS: []*string{new("10"), new("10"), new("11")},
+			NS: []*string{aws.String("10"), aws.String("10"), aws.String("11")},
 		},
 		":matrix": {
 			L: []*types.Item{
 				{L: []*types.Item{
-					{S: new("a")},
-					{S: new("b")},
+					{S: aws.String("a")},
+					{S: aws.String("b")},
 				}},
 				{L: []*types.Item{
-					{S: new("c")},
+					{S: aws.String("c")},
 				}},
 			},
 		},
-		":listIndex": {N: new("0")},
+		":listIndex": {N: aws.String("0")},
 		":nestedMap": {
 			M: map[string]*types.Item{
 				"lvl1": {
@@ -234,32 +235,32 @@ func TestEvalFunctions(t *testing.T) {
 	env := NewEnvironment()
 
 	err := env.AddAttributes(map[string]*types.Item{
-		":s":        {S: new("HELLO WORLD!")},
-		":sSize":    {N: new("12")},
-		":type":     {S: new("S")},
-		":nullType": {S: new("NULL")},
+		":s":        {S: aws.String("HELLO WORLD!")},
+		":sSize":    {N: aws.String("12")},
+		":type":     {S: aws.String("S")},
+		":nullType": {S: aws.String("NULL")},
 		":nilVal":   {NULL: &boolTrue},
 		":bin":      {B: []byte{10, 10, 10}},
-		":binSize":  {N: new("3")},
-		":prefix":   {S: new("HELLO")},
-		":subtext":  {S: new("ELL")},
-		":element":  {S: new("a")},
-		":num":      {N: new("1")},
+		":binSize":  {N: aws.String("3")},
+		":prefix":   {S: aws.String("HELLO")},
+		":subtext":  {S: aws.String("ELL")},
+		":element":  {S: aws.String("a")},
+		":num":      {N: aws.String("1")},
 		":list": {
 			L: []*types.Item{
-				{S: new("a")},
-				{S: new("b")},
-				{S: new("c")},
+				{S: aws.String("a")},
+				{S: aws.String("b")},
+				{S: aws.String("c")},
 			},
 		},
 		":strSet": {
-			SS: []*string{new("a"), new("a"), new("b")},
+			SS: []*string{aws.String("a"), aws.String("a"), aws.String("b")},
 		},
 		":binSet": {
 			BS: [][]byte{{10, 10, 10}},
 		},
 		":numSet": {
-			NS: []*string{new("1"), new("2"), new("4")},
+			NS: []*string{aws.String("1"), aws.String("2"), aws.String("4")},
 		},
 	})
 	if err != nil {
@@ -279,38 +280,38 @@ func startEvalUpdateEnv(t *testing.T) *Environment {
 
 	err := env.AddAttributes(map[string]*types.Item{
 		":x":    {BOOL: &boolTrue},
-		":val":  {S: new("text")},
-		":one":  {N: new("1")},
+		":val":  {S: aws.String("text")},
+		":one":  {N: aws.String("1")},
 		":bin":  {B: []byte("c")},
-		":list": {L: []*types.Item{{N: new("0")}}},
+		":list": {L: []*types.Item{{N: aws.String("0")}}},
 		":hash": {
 			M: map[string]*types.Item{
 				"a": {BOOL: &boolTrue},
 			},
 		},
-		":mapField": {S: new("key")},
+		":mapField": {S: aws.String("key")},
 		":matrix": {
 			L: []*types.Item{
-				{L: []*types.Item{{N: new("0")}}},
+				{L: []*types.Item{{N: aws.String("0")}}},
 			},
 		},
 		":nestedMap": {
 			M: map[string]*types.Item{
 				"lvl1": {
 					M: map[string]*types.Item{
-						"lvl2": {N: new("0")},
+						"lvl2": {N: aws.String("0")},
 					},
 				},
 			},
 		},
 		"random_field_name": {
-			S: new("Some random value"),
+			S: aws.String("Some random value"),
 		},
 		":strSet": {
-			SS: []*string{new("a"), new("a"), new("b")},
+			SS: []*string{aws.String("a"), aws.String("a"), aws.String("b")},
 		},
 		":a": {
-			S: new("a"),
+			S: aws.String("a"),
 		},
 		":binSet": {
 			BS: [][]byte{[]byte("a"), []byte("b")},
@@ -319,17 +320,17 @@ func startEvalUpdateEnv(t *testing.T) *Environment {
 			B: []byte("a"),
 		},
 		":numSet": {
-			NS: []*string{new("2"), new("4")},
+			NS: []*string{aws.String("2"), aws.String("4")},
 		},
 		":two": {
-			N: new("2"),
+			N: aws.String("2"),
 		},
 		":tools": {L: []*types.Item{
-			{S: new("Chisel")},
-			{S: new("Hammer")},
-			{S: new("Nails")},
-			{S: new("Screwdriver")},
-			{S: new("Hacksaw")},
+			{S: aws.String("Chisel")},
+			{S: aws.String("Hammer")},
+			{S: aws.String("Nails")},
+			{S: aws.String("Screwdriver")},
+			{S: aws.String("Hacksaw")},
 		}},
 	})
 	if err != nil {
@@ -676,13 +677,13 @@ func TestErrorHandling(t *testing.T) {
 	err := env.AddAttributes(map[string]*types.Item{
 		":a":   {BOOL: &boolTrue},
 		":b":   {BOOL: &boolFalse},
-		":x":   {N: new("24")},
-		":y":   {N: new("25")},
-		":z":   {N: new("26")},
-		":str": {S: new("TEXT")},
+		":x":   {N: aws.String("24")},
+		":y":   {N: aws.String("25")},
+		":z":   {N: aws.String("26")},
+		":str": {S: aws.String("TEXT")},
 		":nil": {NULL: &boolTrue},
 		":list": {L: []*types.Item{
-			{S: new("a")},
+			{S: aws.String("a")},
 		}},
 	})
 	if err != nil {
@@ -730,8 +731,8 @@ func TestEvalUpdateReservedKeywords(t *testing.T) {
 	env := NewEnvironment()
 
 	err := env.AddAttributes(map[string]*types.Item{
-		":status": {S: new("healthy")},
-		":keys":   {SS: []*string{new("Key"), new("Another Key")}},
+		":status": {S: aws.String("healthy")},
+		":keys":   {SS: []*string{aws.String("Key"), aws.String("Another Key")}},
 	})
 	if err != nil {
 		panic(err)
@@ -775,8 +776,8 @@ func TestEvalReservedKeywords(t *testing.T) {
 	env := NewEnvironment()
 
 	err := env.AddAttributes(map[string]*types.Item{
-		":y":   {N: new("25")},
-		":str": {S: new("TEXT")},
+		":y":   {N: aws.String("25")},
+		":str": {S: aws.String("TEXT")},
 		":obj": {
 			M: map[string]*types.Item{
 				"a": {BOOL: &boolTrue},
@@ -852,8 +853,8 @@ func TestEvalErrors(t *testing.T) {
 
 	err := env.AddAttributes(map[string]*types.Item{
 		":x":   {BOOL: &boolTrue},
-		":val": {S: new("text")},
-		":one": {N: new("1")},
+		":val": {S: aws.String("text")},
+		":one": {N: aws.String("1")},
 		":h": {
 			M: map[string]*types.Item{
 				"a": {BOOL: &boolTrue},
@@ -863,7 +864,7 @@ func TestEvalErrors(t *testing.T) {
 			NULL: &boolTrue,
 		},
 		":list": {L: []*types.Item{
-			{S: new("a")},
+			{S: aws.String("a")},
 		}},
 	})
 	if err != nil {
@@ -1021,8 +1022,8 @@ func TestUpdateEvalSyntaxError(t *testing.T) {
 
 	err := env.AddAttributes(map[string]*types.Item{
 		":x":   {BOOL: &boolTrue},
-		":val": {S: new("text")},
-		":one": {N: new("1")},
+		":val": {S: aws.String("text")},
+		":one": {N: aws.String("1")},
 		":h": {
 			M: map[string]*types.Item{
 				"a": {BOOL: &boolTrue},
@@ -1033,13 +1034,13 @@ func TestUpdateEvalSyntaxError(t *testing.T) {
 			{M: map[string]*types.Item{}},
 		}},
 		"wrapper": {M: map[string]*types.Item{
-			"label": {S: new("text")},
+			"label": {S: aws.String("text")},
 		}},
 		":voidVal": {
 			NULL: &boolTrue,
 		},
 		":list": {L: []*types.Item{
-			{S: new("a")},
+			{S: aws.String("a")},
 		}},
 	})
 	if err != nil {

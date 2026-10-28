@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/truora/minidyn/types"
 )
 
@@ -12,16 +13,16 @@ var boolTrue = true
 func TestNativeMatch(t *testing.T) {
 	item := map[string]*types.Item{
 		"a": {
-			S: new("a"),
+			S: aws.String("a"),
 		},
 		"n": {
-			N: new("1"),
+			N: aws.String("1"),
 		},
 		"b": {
 			BOOL: &boolTrue,
 		},
 		"txt": {
-			S: new("hello world"),
+			S: aws.String("hello world"),
 		},
 	}
 
@@ -32,7 +33,7 @@ func TestNativeMatch(t *testing.T) {
 		ExpressionType: ExpressionTypeConditional,
 		Attributes: map[string]*types.Item{
 			":a": {
-				S: new("a"),
+				S: aws.String("a"),
 			},
 		},
 	}
@@ -99,16 +100,16 @@ func TestAddMatcher(t *testing.T) {
 func TestNativeUpdate(t *testing.T) {
 	item := map[string]*types.Item{
 		"a": {
-			S: new("a"),
+			S: aws.String("a"),
 		},
 		"n": {
-			N: new("1"),
+			N: aws.String("1"),
 		},
 		"b": {
 			BOOL: &boolTrue,
 		},
 		"txt": {
-			S: new("hello world"),
+			S: aws.String("hello world"),
 		},
 	}
 
@@ -118,7 +119,7 @@ func TestNativeUpdate(t *testing.T) {
 		Item:       item,
 		Attributes: map[string]*types.Item{
 			":b": {
-				S: new("foo"),
+				S: aws.String("foo"),
 			},
 		},
 	}

@@ -24,9 +24,9 @@ type pokemon struct {
 
 func createPokemon(creature pokemon) map[string]*types.Item {
 	item := map[string]*types.Item{
-		"id":   {S: new(creature.ID)},
-		"type": {S: new(creature.Type)},
-		"name": {S: new(creature.Name)},
+		"id":   {S: aws.String(creature.ID)},
+		"type": {S: aws.String(creature.Type)},
+		"name": {S: aws.String(creature.Name)},
 	}
 
 	return item
@@ -93,7 +93,7 @@ func createGlobalSecondaryIndex() *types.GlobalSecondaryIndexUpdate {
 func createLocalSecondaryIndex() []*types.LocalSecondaryIndex {
 	return []*types.LocalSecondaryIndex{
 		{
-			IndexName: new("indexname"),
+			IndexName: aws.String("indexname"),
 		},
 	}
 }
@@ -156,14 +156,14 @@ func TestApplyIndexChange(t *testing.T) {
 	err := newTable.ApplyIndexChange(globalSecondaryIndex)
 	c.Contains(err.Error(), "No provisioned throughput specified for the global secondary index")
 
-	newTable.BillingMode = new("PAY_PER_REQUEST")
+	newTable.BillingMode = aws.String("PAY_PER_REQUEST")
 	err = newTable.ApplyIndexChange(globalSecondaryIndex)
 	c.Contains(err.Error(), "No Hash Key specified in schema.")
 
 	newTable, err = createPokemonTable()
 	c.NoError(err)
 
-	newTable.BillingMode = new("PAY_PER_REQUEST")
+	newTable.BillingMode = aws.String("PAY_PER_REQUEST")
 	createTableInput := &types.CreateTableInput{
 		KeySchema: []*types.KeySchemaElement{
 			{
@@ -183,7 +183,7 @@ func TestApplyIndexChange(t *testing.T) {
 				KeyType:       "HASH",
 			},
 		},
-		IndexName: new("indexname"),
+		IndexName: aws.String("indexname"),
 	}
 
 	err = newTable.ApplyIndexChange(globalSecondaryIndex)
@@ -192,7 +192,7 @@ func TestApplyIndexChange(t *testing.T) {
 	globalSecondaryIndex.Create = nil
 
 	globalSecondaryIndex.Delete = &types.DeleteGlobalSecondaryIndexAction{
-		IndexName: new("indexname"),
+		IndexName: aws.String("indexname"),
 	}
 
 	err = newTable.ApplyIndexChange(globalSecondaryIndex)
@@ -205,7 +205,7 @@ func TestApplyIndexChange(t *testing.T) {
 	globalSecondaryIndex.Delete = nil
 
 	globalSecondaryIndex.Update = &types.UpdateGlobalSecondaryIndexAction{
-		IndexName: new("indexname"),
+		IndexName: aws.String("indexname"),
 	}
 
 	err = newTable.ApplyIndexChange(globalSecondaryIndex)
@@ -245,7 +245,7 @@ func TestCreatePrimaryIndex(t *testing.T) {
 	err = newTable.CreatePrimaryIndex(createTableInput)
 	c.Contains(err.Error(), "No provisioned throughput specified for the table")
 
-	newTable.BillingMode = new("PAY_PER_REQUEST")
+	newTable.BillingMode = aws.String("PAY_PER_REQUEST")
 	err = newTable.CreatePrimaryIndex(createTableInput)
 	c.NoError(err)
 }
@@ -254,7 +254,7 @@ func TestValidateKeyAttributeScalarTypesPrimaryIndex(t *testing.T) {
 	c := require.New(t)
 
 	tbl := NewTable(tableName)
-	tbl.BillingMode = new("PAY_PER_REQUEST")
+	tbl.BillingMode = aws.String("PAY_PER_REQUEST")
 	tbl.AttributesDef = map[string]string{"pk": "BOOL"}
 	err := tbl.CreatePrimaryIndex(&types.CreateTableInput{
 		KeySchema: []*types.KeySchemaElement{{AttributeName: "pk", KeyType: "HASH"}},
@@ -295,7 +295,7 @@ func TestValidateKeyAttributeScalarTypesGSI(t *testing.T) {
 	c := require.New(t)
 
 	tbl := NewTable(tableName)
-	tbl.BillingMode = new("PAY_PER_REQUEST")
+	tbl.BillingMode = aws.String("PAY_PER_REQUEST")
 	tbl.AttributesDef = map[string]string{"pk": "S", "gsi_h": "BOOL"}
 	idxName := "by-bool"
 	err := tbl.AddGlobalIndexes([]*types.GlobalSecondaryIndex{{
@@ -342,7 +342,7 @@ func TestValidateKeyAttributeScalarTypesLSI(t *testing.T) {
 	c := require.New(t)
 
 	tbl := NewTable(tableName)
-	tbl.BillingMode = new("PAY_PER_REQUEST")
+	tbl.BillingMode = aws.String("PAY_PER_REQUEST")
 	tbl.AttributesDef = map[string]string{"pk": "S", "sk": "S", "lsi_r": "BOOL"}
 	idxName := "lsi-bad"
 	err := tbl.AddLocalIndexes([]*types.LocalSecondaryIndex{{
@@ -459,18 +459,18 @@ func TestGetKey(t *testing.T) {
 	newTable.AttributesDef = map[string]string{"HASH": "S", "range": "S"}
 	newTable.KeySchema = keySchema{"range", "HASH", false}
 
-	k, err := newTable.KeySchema.GetKey(map[string]string{"HASH": "S", "range": "S"}, map[string]*types.Item{"range": {S: new("range")}, "HASH": {S: new("HASH")}})
+	k, err := newTable.KeySchema.GetKey(map[string]string{"HASH": "S", "range": "S"}, map[string]*types.Item{"range": {S: aws.String("range")}, "HASH": {S: aws.String("HASH")}})
 	c.NoError(err)
 	c.Equal("range.HASH", k)
 
-	_, err = newTable.KeySchema.GetKey(map[string]string{"incorrect": "S", "range": "S"}, map[string]*types.Item{"range": {S: new("range")}, "HASH": {S: new("HASH")}})
+	_, err = newTable.KeySchema.GetKey(map[string]string{"incorrect": "S", "range": "S"}, map[string]*types.Item{"range": {S: aws.String("range")}, "HASH": {S: aws.String("HASH")}})
 	c.EqualError(err, `Invalid attribute value type; field "HASH"`)
 
-	_, err = newTable.KeySchema.GetKey(map[string]string{"HASH": "S", "": "S"}, map[string]*types.Item{"range": {S: new("range")}, "HASH": {S: new("HASH")}})
+	_, err = newTable.KeySchema.GetKey(map[string]string{"HASH": "S", "": "S"}, map[string]*types.Item{"range": {S: aws.String("range")}, "HASH": {S: aws.String("HASH")}})
 	c.EqualError(err, `Invalid attribute value type; field "range"`)
 
 	newTable.KeySchema = keySchema{"", "", true}
-	_, err = newTable.KeySchema.GetKey(map[string]string{"incorrect": "S", "range": "S"}, map[string]*types.Item{"range": {S: new("range")}, "HASH": {S: new("HASH")}})
+	_, err = newTable.KeySchema.GetKey(map[string]string{"incorrect": "S", "range": "S"}, map[string]*types.Item{"range": {S: aws.String("range")}, "HASH": {S: aws.String("HASH")}})
 	c.NoError(err)
 }
 
@@ -531,8 +531,8 @@ func TestDeleteItem(t *testing.T) {
 
 	inp := &types.DeleteItemInput{
 		Key: map[string]*types.Item{
-			"id":   {S: new("002")},
-			"name": {S: new("Ivysaur")},
+			"id":   {S: aws.String("002")},
+			"name": {S: aws.String("Ivysaur")},
 		},
 		TableName: &newTable.Name,
 	}
@@ -547,7 +547,7 @@ func TestDeleteItem(t *testing.T) {
 
 	inp = &types.DeleteItemInput{
 		Key: map[string]*types.Item{
-			"id": {S: new("123")},
+			"id": {S: aws.String("123")},
 		},
 		TableName: &newTable.Name,
 	}
@@ -597,8 +597,8 @@ func TestDeleteIndex(t *testing.T) {
 
 	inp := &types.DeleteItemInput{
 		Key: map[string]*types.Item{
-			"id":   {S: new("002")},
-			"name": {S: new("Ivysaur")},
+			"id":   {S: aws.String("002")},
+			"name": {S: aws.String("Ivysaur")},
 		},
 		TableName: &newTable.Name,
 	}
@@ -640,7 +640,7 @@ func TestSearchData(t *testing.T) {
 
 	queryInput = QueryInput{
 		ExpressionAttributeValues: map[string]*types.Item{
-			":id": {S: new("001")},
+			":id": {S: aws.String("001")},
 		},
 	}
 
@@ -691,8 +691,8 @@ func TestPut_duplicateSetValidationException(t *testing.T) {
 
 	a, b := "x", "x"
 	item := map[string]*types.Item{
-		"id":   {S: new("001")},
-		"name": {S: new("n")},
+		"id":   {S: aws.String("001")},
+		"name": {S: aws.String("n")},
 		"tags": {SS: []*string{&a, &b}},
 	}
 
@@ -827,7 +827,7 @@ func TestUpdate(t *testing.T) {
 			"#id": "id",
 		},
 		ExpressionAttributeValues: map[string]*types.Item{
-			":id": {S: new("002")},
+			":id": {S: aws.String("002")},
 		},
 		Key: primaryKeyFromPokemonItem(item),
 	}
@@ -835,7 +835,7 @@ func TestUpdate(t *testing.T) {
 	_, err = newTable.Update(updateInput)
 	c.Contains(err.Error(), "invalid update expression")
 
-	updateInput.ConditionExpression = new("attribute_not_exists(#id)")
+	updateInput.ConditionExpression = aws.String("attribute_not_exists(#id)")
 	updateInput.ReturnValuesOnConditionCheckFailure = aws.String("ALL_OLD")
 
 	_, err = newTable.Update(updateInput)
@@ -848,7 +848,7 @@ func TestUpdate(t *testing.T) {
 	c.Equal("grass", types.StringValue(checkErr.Item["type"].S))
 	c.Equal("Bulbasaur", types.StringValue(checkErr.Item["name"].S))
 
-	updateInput.ConditionExpression = new("attribute_exists(id)")
+	updateInput.ConditionExpression = aws.String("attribute_exists(id)")
 	updateInput.UpdateExpression = "SET id = :id"
 	updateInput.ReturnValues = aws.String("ALL_NEW")
 
@@ -875,7 +875,7 @@ func TestUpdateMultiClauseExpression(t *testing.T) {
 		Type: "grass",
 		Name: "Bulbasaur",
 	})
-	item["lvl"] = &types.Item{N: new("1")}
+	item["lvl"] = &types.Item{N: aws.String("1")}
 
 	input := &types.PutItemInput{
 		Item:      item,
@@ -891,8 +891,8 @@ func TestUpdateMultiClauseExpression(t *testing.T) {
 			"#t": "type",
 		},
 		ExpressionAttributeValues: map[string]*types.Item{
-			":new": {S: new("poison")},
-			":one": {N: new("1")},
+			":new": {S: aws.String("poison")},
+			":one": {N: aws.String("1")},
 		},
 		UpdateExpression: "SET #t = :new ADD lvl :one",
 		ReturnValues:     aws.String("ALL_NEW"),
@@ -912,7 +912,7 @@ func TestUpdateReturnValuesSemantics(t *testing.T) {
 	newTable, err := createPokemonTable()
 	c.NoError(err)
 
-	exprVals := map[string]*types.Item{":st": {S: new("poison")}}
+	exprVals := map[string]*types.Item{":st": {S: aws.String("poison")}}
 	uexpr := "SET second_type = :st"
 
 	run := func(id string, rv *string) map[string]*types.Item {
@@ -991,7 +991,7 @@ func TestUpdateInvalidReturnValues(t *testing.T) {
 		ReturnValues:              aws.String("NOT_A_REAL_MODE"),
 		UpdateExpression:          "SET #n = :new",
 		ExpressionAttributeNames:  map[string]string{"#n": "name"},
-		ExpressionAttributeValues: map[string]*types.Item{":new": {S: new("X")}},
+		ExpressionAttributeValues: map[string]*types.Item{":new": {S: aws.String("X")}},
 	})
 	c.Error(err)
 	c.Contains(err.Error(), "returnValues")
@@ -1025,8 +1025,8 @@ func TestUpdateDuplicateClauseKeywordError(t *testing.T) {
 			"#t": "type",
 		},
 		ExpressionAttributeValues: map[string]*types.Item{
-			":a": {S: new("x")},
-			":b": {S: new("y")},
+			":a": {S: aws.String("x")},
+			":b": {S: aws.String("y")},
 		},
 		UpdateExpression: "SET #t = :a SET type = :b",
 	}
@@ -1044,9 +1044,9 @@ func TestPutItem(t *testing.T) {
 	newTable := NewTable(tableName)
 
 	item := map[string]*types.Item{
-		"id":        {S: new("123")},
-		"name":      {S: new("Lili")},
-		"last_name": {S: new("Cruz")},
+		"id":        {S: aws.String("123")},
+		"name":      {S: aws.String("Lili")},
+		"last_name": {S: aws.String("Cruz")},
 	}
 
 	input := &types.PutItemInput{
@@ -1067,7 +1067,7 @@ func TestPutItem(t *testing.T) {
 	}
 
 	input.ExpressionAttributeValues = map[string]*types.Item{
-		":id": {S: new("456")},
+		":id": {S: aws.String("456")},
 	}
 
 	_, err = newTable.Put(input)
@@ -1096,7 +1096,7 @@ func TestPutItemOverwriteReconcilesGSIKey(t *testing.T) {
 
 	put := func(id, typ string) {
 		_, perr := newTable.Put(&types.PutItemInput{
-			Item:      map[string]*types.Item{"id": {S: new(id)}, "type": {S: new(typ)}},
+			Item:      map[string]*types.Item{"id": {S: aws.String(id)}, "type": {S: aws.String(typ)}},
 			TableName: &newTable.Name,
 		})
 		c.NoError(perr)
@@ -1107,7 +1107,7 @@ func TestPutItemOverwriteReconcilesGSIKey(t *testing.T) {
 			Index:                     "by-type",
 			KeyConditionExpression:    "#type = :type",
 			Aliases:                   map[string]string{"#type": "type"},
-			ExpressionAttributeValues: map[string]*types.Item{":type": {S: new(typ)}},
+			ExpressionAttributeValues: map[string]*types.Item{":type": {S: aws.String(typ)}},
 			ScanIndexForward:          true,
 		})
 		c.NoError(qerr)
@@ -1192,7 +1192,7 @@ func TestInterpreterMatch(t *testing.T) {
 		Item:       item,
 		Attributes: map[string]*types.Item{
 			":id": {
-				S: new("001"),
+				S: aws.String("001"),
 			},
 		},
 		Aliases: map[string]string{
@@ -1233,14 +1233,14 @@ func TestMatchKey(t *testing.T) {
 
 	queryInput := QueryInput{
 		ExpressionAttributeValues: map[string]*types.Item{
-			":id": {S: new("001")},
+			":id": {S: aws.String("001")},
 		},
 		Aliases: map[string]string{
 			"#id": "id",
 		},
 		KeyConditionExpression: "#id = :id",
 		FilterExpression:       "#id = :id",
-		ConditionExpression:    new("attribute_exists(id)"),
+		ConditionExpression:    aws.String("attribute_exists(id)"),
 	}
 
 	expresionType, ok, err := newTable.matchKey(queryInput, item)
@@ -1363,7 +1363,7 @@ func TestMatchKey_errorsAndFilterBranches(t *testing.T) {
 		_, _, err := table.matchKey(QueryInput{
 			KeyConditionExpression: ")))",
 			ExpressionAttributeValues: map[string]*types.Item{
-				":id": {S: new("001")},
+				":id": {S: aws.String("001")},
 			},
 		}, item)
 		req.Error(err)
@@ -1381,7 +1381,7 @@ func TestMatchKey_errorsAndFilterBranches(t *testing.T) {
 				"#id": "id",
 			},
 			ExpressionAttributeValues: map[string]*types.Item{
-				":id": {S: new("001")},
+				":id": {S: aws.String("001")},
 			},
 		}, item)
 		req.Error(err)
@@ -1395,7 +1395,7 @@ func TestMatchKey_errorsAndFilterBranches(t *testing.T) {
 		_, _, err := table.matchKey(QueryInput{
 			ConditionExpression: aws.String(")))"),
 			ExpressionAttributeValues: map[string]*types.Item{
-				":id": {S: new("001")},
+				":id": {S: aws.String("001")},
 			},
 		}, item)
 		req.Error(err)
@@ -1413,7 +1413,7 @@ func TestMatchKey_errorsAndFilterBranches(t *testing.T) {
 				"#id": "id",
 			},
 			ExpressionAttributeValues: map[string]*types.Item{
-				":id": {S: new("999")},
+				":id": {S: aws.String("999")},
 			},
 		}, item)
 		req.NoError(err)
@@ -1524,8 +1524,8 @@ func TestSetAttributeDefinition(t *testing.T) {
 
 	newAttributesDef := []*types.AttributeDefinition{
 		{
-			AttributeName: new("name"),
-			AttributeType: new("type"),
+			AttributeName: aws.String("name"),
+			AttributeType: aws.String("type"),
 		},
 	}
 

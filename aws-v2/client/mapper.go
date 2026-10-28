@@ -267,12 +267,12 @@ func mapDynamoToTypesItem(item dynamodbtypes.AttributeValue) *types.Item {
 
 	itemS, ok := item.(*dynamodbtypes.AttributeValueMemberS)
 	if ok {
-		return &types.Item{S: new(itemS.Value)}
+		return &types.Item{S: aws.String(itemS.Value)}
 	}
 
 	itemN, ok := item.(*dynamodbtypes.AttributeValueMemberN)
 	if ok {
-		return &types.Item{N: new(itemN.Value)}
+		return &types.Item{N: aws.String(itemN.Value)}
 	}
 
 	itemNS, ok := item.(*dynamodbtypes.AttributeValueMemberNS)
@@ -710,8 +710,8 @@ func toString(str string) *string {
 }
 
 func mapKnownError(err error) error {
-	intErr, ok := errors.AsType[types.Error](err)
-	if !ok {
+	var intErr types.Error
+	if !errors.As(err, &intErr) {
 		return err
 	}
 
@@ -721,7 +721,8 @@ func mapKnownError(err error) error {
 			Message: aws.String(intErr.Message()),
 		}
 
-		if conditionalErr, ok := errors.AsType[*types.ConditionalCheckFailedException](err); ok {
+		var conditionalErr *types.ConditionalCheckFailedException
+		if errors.As(err, &conditionalErr) {
 			checkErr.Item = mapTypesToDynamoMapItem(conditionalErr.Item)
 		}
 
