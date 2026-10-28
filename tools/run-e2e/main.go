@@ -56,8 +56,9 @@ func parseArgs(argv []string) (pattern string, extra []string) {
 }
 
 func startGoTest(pattern string, extra []string) (*exec.Cmd, io.ReadCloser, error) {
-	args := append([]string{"test", "./e2e/...", "-json", "-run", pattern}, extra...)
+	args := append([]string{"test", "./...", "-json", "-run", pattern}, extra...)
 	cmd := exec.Command("go", args...) //nolint:gosec // variable args are required here
+	cmd.Dir = "e2e"
 	cmd.Stderr = os.Stderr
 
 	stdout, err := cmd.StdoutPipe()

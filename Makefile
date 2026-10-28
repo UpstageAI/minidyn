@@ -4,7 +4,7 @@
 
 # Unit tests: all packages except parity E2E (same scope as qa-engineer).
 test:
-	go test $$(go list ./... | grep -v '/e2e$$')
+	go test ./...
 
 # Parity E2E tests (DynamoDB Local via testcontainers); JSON harness prints failures only.
 e2e:
